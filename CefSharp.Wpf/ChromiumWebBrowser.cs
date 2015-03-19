@@ -1410,6 +1410,18 @@ namespace CefSharp.Wpf
             return managedCefBrowserAdapter.EvaluateScriptAsync(script, timeout);
         }
 
+        public List<long> GetFrameIds()
+        {
+            return managedCefBrowserAdapter.GetFrameIds();
+        }
+
+        public Task<JavascriptResponse> EvaluateScriptAsync(long frameId, string script, TimeSpan? timeout)
+        {
+            return managedCefBrowserAdapter.EvaluateScriptAsync(frameId, script, timeout);
+        }
+
+       
+
         /// <summary>
         /// Raises Rendering event
         /// </summary>

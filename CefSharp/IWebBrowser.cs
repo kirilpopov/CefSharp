@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace CefSharp
 {
+    using System.Collections.Generic;
+
     public interface IWebBrowser : IDisposable
     {
         /// <summary>
@@ -103,6 +105,10 @@ namespace CefSharp
         /// <param name="timeout">The timeout after which the Javascript code execution should be aborted.</param>
         /// /// <returns>A Task that can be awaited to perform the script execution</returns>
         Task<JavascriptResponse> EvaluateScriptAsync(string script, TimeSpan? timeout = null);
+
+        List<long> GetFrameIds();
+
+        Task<JavascriptResponse> EvaluateScriptAsync(long frameId, string script, TimeSpan? timeout = null);
 
         /// <summary>
         /// Implement <see cref="IDialogHandler"/> and assign to handle dialog events.

@@ -11,6 +11,8 @@ using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace CefSharp.OffScreen
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// An offscreen instance of Chromium that you can use to take
     /// snapshots or evaluate JavaScript.
@@ -263,6 +265,16 @@ namespace CefSharp.OffScreen
         public Task<JavascriptResponse> EvaluateScriptAsync(string script, TimeSpan? timeout = null)
         {
             return managedCefBrowserAdapter.EvaluateScriptAsync(script, timeout);
+        }
+
+        public List<long> GetFrameIds()
+        {
+            return managedCefBrowserAdapter.GetFrameIds();
+        }
+
+        public Task<JavascriptResponse> EvaluateScriptAsync(long frameId, string script, TimeSpan? timeout = null)
+        {
+            return managedCefBrowserAdapter.EvaluateScriptAsync(frameId, script, timeout);
         }
 
         public void ExecuteScriptAsync(string script)
