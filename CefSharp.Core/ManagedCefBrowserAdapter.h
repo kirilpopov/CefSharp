@@ -575,6 +575,43 @@ namespace CefSharp
             return _browserProcessServiceHost->EvaluateScriptAsync(browser->GetIdentifier(), frame->GetIdentifier(), script, timeout);
         }
 
+        System::Collections::Generic::List<Int64>^ GetFrameIds()
+        {
+            auto browser = _clientAdapter->GetCefBrowser();
+            std::vector<int64> frameIds;
+            browser->GetFrameIdentifiers(frameIds);
+            auto result = gcnew System::Collections::Generic::List<Int64>(frameIds.size());
+            for (std::vector<int64>::const_iterator it = frameIds.begin(); it != frameIds.end(); ++it)
+            {
+                result->Add(*it);
+            }
+            return result;
+        }
+
+        Task<JavascriptResponse^>^ EvaluateScriptAsync(Int64 frameId, String^ script, Nullable<TimeSpan> timeout)
+        {
+            if (timeout.HasValue && timeout.Value.TotalMilliseconds > UInt32::MaxValue)
+            {
+                throw gcnew ArgumentOutOfRangeException("timeout", "Timeout greater than Maximum allowable value of " + UInt32::MaxValue);
+            }
+
+            auto browser = _clientAdapter->GetCefBrowser();
+
+            if (_browserProcessServiceHost == nullptr && browser == nullptr)
+            {
+                return nullptr;
+            }
+
+            auto frame = browser->GetFrame(frameId);
+
+            if (frame == nullptr)
+            {
+                return nullptr;
+            }
+
+            return _browserProcessServiceHost->EvaluateScriptAsync(browser->GetIdentifier(), frame->GetIdentifier(), script, timeout);
+        }
+
         double GetZoomLevel()
         {
             auto browser = _clientAdapter->GetCefBrowser();

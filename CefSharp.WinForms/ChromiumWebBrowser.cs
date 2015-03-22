@@ -11,6 +11,8 @@ using CefSharp.WinForms.Internals;
 
 namespace CefSharp.WinForms
 {
+    using System.Collections.Generic;
+
     public class ChromiumWebBrowser : Control, IWebBrowserInternal, IWinFormsWebBrowser
     {
         private ManagedCefBrowserAdapter managedCefBrowserAdapter;
@@ -27,6 +29,7 @@ namespace CefSharp.WinForms
         public bool IsLoading { get; private set; }
         public string TooltipText { get; private set; }
         public string Address { get; private set; }
+       
 
         public IDialogHandler DialogHandler { get; set; }
         public IJsDialogHandler JsDialogHandler { get; set; }
@@ -208,6 +211,11 @@ namespace CefSharp.WinForms
             managedCefBrowserAdapter.ExecuteScriptAsync(script);
         }
 
+        public Task<JavascriptResponse> EvaluateScriptAsync(long frameId, string script, TimeSpan? timeout = null)
+        {
+            return managedCefBrowserAdapter.EvaluateScriptAsync(frameId, script, timeout);
+        }
+
         public Task<JavascriptResponse> EvaluateScriptAsync(string script)
         {
             return EvaluateScriptAsync(script, timeout: null);
@@ -216,6 +224,11 @@ namespace CefSharp.WinForms
         public Task<JavascriptResponse> EvaluateScriptAsync(string script, TimeSpan? timeout)
         {
             return managedCefBrowserAdapter.EvaluateScriptAsync(script, timeout);
+        }
+
+        public List<long> GetFrameIds()
+        {
+            return managedCefBrowserAdapter.GetFrameIds();
         }
 
         public void SendMouseWheelEvent(int x, int y, int deltaX, int deltaY)
