@@ -39,6 +39,7 @@ namespace CefSharp.OffScreen
         /// </summary>
         private Size size = new Size(1366, 768);
 
+        public ILogHandler LogHandler { get; set; }
         public bool IsBrowserInitialized { get; private set; }
         public bool IsLoading { get; set; }
         public string Title { get; set; }

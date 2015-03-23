@@ -165,6 +165,7 @@ namespace CefSharp
         /// </summary>
         IGeolocationHandler GeolocationHandler { get; set; }
 
+        ILogHandler LogHandler { get; set; }
         /// <summary>
         /// A flag that indicates whether the WebBrowser is initialized (true) or not (false).
         /// </summary>

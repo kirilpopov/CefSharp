@@ -24,6 +24,7 @@ namespace CefSharp
     {
         MCefRefPtr<ClientAdapter> _clientAdapter;
         BrowserProcessServiceHost^ _browserProcessServiceHost;
+        LogServiceHost^ _logServiceHost;
         IWebBrowserInternal^ _webBrowserInternal;
         JavascriptObjectRepository^ _javaScriptObjectRepository;
 
@@ -112,6 +113,13 @@ namespace CefSharp
             if(_browserProcessServiceHost->State == CommunicationState::Created)
             {
                 _browserProcessServiceHost->Open();
+            }
+
+            // create log service host
+            _logServiceHost = gcnew LogServiceHost(Process::GetCurrentProcess()->Id, browserId, _webBrowserInternal->LogHandler);
+            if (_logServiceHost->State == CommunicationState::Created)
+            {
+              _logServiceHost->Open();
             }
 
             if(_webBrowserInternal != nullptr)

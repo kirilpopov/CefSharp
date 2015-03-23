@@ -12,24 +12,43 @@ namespace CefSharp.BrowserSubprocess
 {
     public class Program
     {
+        private static CefSubProcess subProcess;
         public static int Main(string[] args)
         {
             Kernel32.OutputDebugString("BrowserSubprocess starting up with command line: " + String.Join("\n", args));
-
+            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             int result;
 
-            using (var subprocess = Create(args))
+            using (subProcess = Create(args))
             {
                 //if (subprocess is CefRenderProcess)
                 //{
                 //    MessageBox.Show("Please attach debugger now", null, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 //}
-                
-                result = subprocess.Run();
+
+                result = subProcess.Run();
             }
 
             Kernel32.OutputDebugString("BrowserSubprocess shutting down.");
             return result;
+        }
+
+        private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var exception = e.ExceptionObject as Exception;
+
+            try
+            {
+                if (subProcess != null)
+                {
+                    subProcess.Log("Unhandled exception in " + subProcess.GetType() + exception.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(exception.ToString());
+                MessageBox.Show(ex.ToString());
+            }
         }
 
         public static CefSubProcess Create(IEnumerable<string> args)
