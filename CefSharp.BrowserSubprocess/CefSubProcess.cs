@@ -177,7 +177,7 @@ namespace CefSharp.BrowserSubprocess
 
         public override void OnUncaughtException(CefBrowserWrapper cefBrowserWrapper, string text, string stack)
         {
-            Log(new JsExceptionLogMessage());
+            Log(new JsExceptionLogMessage(text, stack));
         }
 
         public void Log(string message)
