@@ -367,6 +367,206 @@ namespace CefSharp
             return ret;
         }
 
+        void ClientAdapter::OnResponseStarted(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request)
+        {
+          IRequestHandler^ handler = _browserControl->RequestHandler;
+
+          if (handler == nullptr)
+          {
+            return;
+          }
+
+          auto requestWrapper = gcnew CefRequestWrapper(request);
+          auto response = gcnew Response();
+
+          handler->OnResponseStarted(_browserControl, requestWrapper, frame->IsMain());
+        }
+
+        void ClientAdapter::OnBeforeSendHeaders(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, CefRequestHandler::HeaderMap& headers)
+        {
+          OnBeforeSendHeadersImpl(browser, frame, request, headers, false);
+        }
+
+        void ClientAdapter::OnBeforeSendProxyHeaders(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, CefRequestHandler::HeaderMap& headers)
+        {
+          OnBeforeSendHeadersImpl(browser, frame, request, headers, true);
+        }
+
+        void ClientAdapter::OnBeforeSendHeadersImpl(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, CefRequestHandler::HeaderMap& headers, bool fromProxy)
+        {
+          IRequestHandler^ handler = _browserControl->RequestHandler;
+
+          if (handler == nullptr)
+          {
+            return;
+          }
+
+          auto requestWrapper = gcnew CefRequestWrapper(request);
+
+          NameValueCollection^ managed_headers = gcnew NameValueCollection();
+
+          for (CefRequest::HeaderMap::iterator it = headers.begin(); it != headers.end(); ++it)
+          {
+            String^ name = StringUtils::ToClr(it->first);
+            String^ value = StringUtils::ToClr(it->second);
+            managed_headers->Add(name, value);
+          }
+
+          handler->OnBeforeSendHeaders(_browserControl, requestWrapper, frame->IsMain(), managed_headers, fromProxy);
+
+          headers.clear();
+          for each (String^ key in managed_headers)
+          {
+            String^ value = managed_headers[key];
+            headers.insert(std::pair<CefString, CefString>(StringUtils::ToNative(key), StringUtils::ToNative(value)));
+          }
+        }
+
+        void ClientAdapter::OnSendHeaders(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, const CefRequestHandler::HeaderMap& headers)
+        {
+          IRequestHandler^ handler = _browserControl->RequestHandler;
+
+          if (handler == nullptr)
+          {
+            return;
+          }
+
+          auto requestWrapper = gcnew CefRequestWrapper(request);
+
+          NameValueCollection^ managed_headers = gcnew NameValueCollection();
+
+          for (CefRequest::HeaderMap::const_iterator it = headers.begin(); it != headers.end(); ++it)
+          {
+            String^ name = StringUtils::ToClr(it->first);
+            String^ value = StringUtils::ToClr(it->second);
+            managed_headers->Add(name, value);
+          }
+
+          handler->OnSendHeaders(_browserControl, requestWrapper, frame->IsMain(), managed_headers);
+        }
+
+
+
+        bool ClientAdapter::OnHeadersReceived(
+          CefRefPtr<CefBrowser> browser,
+          CefRefPtr<CefFrame> frame,
+          CefRefPtr<CefRequest> request,
+          const CefString& original_response_headers,
+          CefString& override_response_headers,
+          const CefString& allowed_unsafe_redirect_url)
+        {
+          IRequestHandler^ handler = _browserControl->RequestHandler;
+
+          if (handler == nullptr)
+          {
+            return false;
+          }
+
+          auto requestWrapper = gcnew CefRequestWrapper(request);
+          System::String^ overrideHeaders;
+
+          if (handler->OnHeadersReceived(
+            _browserControl,
+            requestWrapper,
+            frame->IsMain(),
+            StringUtils::ToClr(original_response_headers),
+            overrideHeaders,
+            StringUtils::ToClr(allowed_unsafe_redirect_url)))
+          {
+            override_response_headers.FromString(StringUtils::ToNative(overrideHeaders));
+            return true;
+          }
+
+          return false;
+        }
+
+        void ClientAdapter::OnBeforeRedirect(
+          CefRefPtr<CefBrowser> browser,
+          CefRefPtr<CefFrame> frame,
+          CefRefPtr<CefRequest> request,
+          const CefString& new_location)
+        {
+          IRequestHandler^ handler = _browserControl->RequestHandler;
+
+          if (handler == nullptr)
+          {
+            return;
+          }
+
+          auto requestWrapper = gcnew CefRequestWrapper(request);
+
+          handler->OnBeforeRedirect(
+            _browserControl,
+            requestWrapper,
+            frame->IsMain(),
+            StringUtils::ToClr(new_location));
+        }
+
+        void ClientAdapter::OnRawBytesRead(
+          CefRefPtr<CefBrowser> browser,
+          CefRefPtr<CefFrame> frame,
+          CefRefPtr<CefRequest> request,
+          int bytes_read)
+        {
+          IRequestHandler^ handler = _browserControl->RequestHandler;
+
+          if (handler == nullptr)
+          {
+            return;
+          }
+
+          auto requestWrapper = gcnew CefRequestWrapper(request);
+
+          handler->OnRawBytesRead(
+            _browserControl,
+            requestWrapper,
+            frame->IsMain(),
+            bytes_read);
+        }
+
+        void ClientAdapter::OnCompleted(
+          CefRefPtr<CefBrowser> browser,
+          CefRefPtr<CefFrame> frame,
+          CefRefPtr<CefRequest> request,
+          bool started)
+        {
+          IRequestHandler^ handler = _browserControl->RequestHandler;
+
+          if (handler == nullptr)
+          {
+            return;
+          }
+
+          auto requestWrapper = gcnew CefRequestWrapper(request);
+
+          handler->OnCompleted(
+            _browserControl,
+            requestWrapper,
+            frame->IsMain(),
+            started);
+        }
+
+        void ClientAdapter::OnURLRequestDestroyed(
+          CefRefPtr<CefBrowser> browser,
+          CefRefPtr<CefFrame> frame,
+          CefRefPtr<CefRequest> request)
+        {
+          IRequestHandler^ handler = _browserControl->RequestHandler;
+
+          if (handler == nullptr)
+          {
+            return;
+          }
+
+          auto requestWrapper = gcnew CefRequestWrapper(request);
+
+          handler->OnURLRequestDestroyed(
+            _browserControl,
+            requestWrapper,
+            frame->IsMain());
+        }
+
+
         CefRefPtr<CefDownloadHandler> ClientAdapter::GetDownloadHandler()
         {
             IDownloadHandler^ downloadHandler = _browserControl->DownloadHandler;

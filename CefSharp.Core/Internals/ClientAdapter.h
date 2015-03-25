@@ -141,7 +141,61 @@ namespace CefSharp
                 CefRefPtr<CefGeolocationCallback> callback) OVERRIDE;
             virtual DECL void OnCancelGeolocationPermission(CefRefPtr<CefBrowser> browser, const CefString& requesting_url, int request_id) OVERRIDE;
 
+            virtual DECL void OnResponseStarted(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request) OVERRIDE;
+            virtual DECL void OnBeforeSendHeaders(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, CefRequestHandler::HeaderMap& headers) OVERRIDE;
+            virtual DECL void OnBeforeSendProxyHeaders(
+              CefRefPtr<CefBrowser> browser,
+              CefRefPtr<CefFrame> frame,
+              CefRefPtr<CefRequest> request,
+              CefRequestHandler::HeaderMap& headers) OVERRIDE;
+            virtual DECL void OnSendHeaders(
+              CefRefPtr<CefBrowser> browser,
+              CefRefPtr<CefFrame> frame,
+              CefRefPtr<CefRequest> request,
+              const CefRequestHandler::HeaderMap& headers) OVERRIDE;
+
+            // returns true if the response headlers should be overriden with the ones supplied in |override_response_headers|
+            virtual DECL bool OnHeadersReceived(
+              CefRefPtr<CefBrowser> browser,
+              CefRefPtr<CefFrame> frame,
+              CefRefPtr<CefRequest> request,
+              const CefString& original_response_headers,
+              CefString& override_response_headers,
+              const CefString& allowed_unsafe_redirect_url) OVERRIDE;
+
+            virtual DECL void OnBeforeRedirect(
+              CefRefPtr<CefBrowser> browser,
+              CefRefPtr<CefFrame> frame,
+              CefRefPtr<CefRequest> request,
+              const CefString& new_location) OVERRIDE;
+
+            virtual DECL void OnRawBytesRead(
+              CefRefPtr<CefBrowser> browser,
+              CefRefPtr<CefFrame> frame,
+              CefRefPtr<CefRequest> request,
+              int bytes_read) OVERRIDE;
+
+            virtual DECL void OnCompleted(
+              CefRefPtr<CefBrowser> browser,
+              CefRefPtr<CefFrame> frame,
+              CefRefPtr<CefRequest> request,
+              bool started) OVERRIDE;
+
+            virtual DECL void OnURLRequestDestroyed(
+              CefRefPtr<CefBrowser> browser,
+              CefRefPtr<CefFrame> frame,
+              CefRefPtr<CefRequest> request) OVERRIDE;
+
+
             IMPLEMENT_REFCOUNTING(ClientAdapter);
+
+            
+            private:
+                void OnBeforeSendHeadersImpl(
+                  CefRefPtr<CefBrowser> browser,
+                  CefRefPtr<CefFrame> frame,
+                  CefRefPtr<CefRequest> request,
+                  CefRequestHandler::HeaderMap& headers, bool fromProxy);
         };
     }
 }

@@ -4,6 +4,8 @@
 
 namespace CefSharp
 {
+    using System.Collections.Specialized;
+
     public interface IRequestHandler
     {
         /// <summary>
@@ -75,5 +77,27 @@ namespace CefSharp
         /// <param name="browser">the browser object</param>
         /// <param name="status">indicates how the process terminated.</param>
         void OnRenderProcessTerminated(IWebBrowser browser, CefTerminationStatus status);
+
+         void OnResponseStarted(IWebBrowser browser, IRequest request, bool isMainFrame);
+
+        void OnBeforeSendHeaders(IWebBrowser browser, IRequest request, bool isMainFrame, NameValueCollection headers, bool viaProxy);
+
+        void OnSendHeaders(IWebBrowser browser, IRequest request, bool isMainFrame, NameValueCollection headers);
+
+        bool OnHeadersReceived(
+            IWebBrowser browser, 
+            IRequest request, 
+            bool isMainFrame, 
+            string originalHeaders, 
+            out string modifiedHeaders, 
+            string allowedUnsafeRedirectUrl);
+
+        void OnBeforeRedirect(IWebBrowser browser, IRequest request, bool isMainFrame, string newLocation);
+
+        void OnRawBytesRead(IWebBrowser browser, IRequest request, bool isMainFrame, int bytesRead);
+
+        void OnCompleted(IWebBrowser browser, IRequest request, bool isMainFrame, bool started);
+
+        void OnURLRequestDestroyed(IWebBrowser browser, IRequest request, bool isMainFrame);
     }
 }
