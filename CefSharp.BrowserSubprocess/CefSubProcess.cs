@@ -3,12 +3,21 @@ using System.Linq;
 
 namespace CefSharp.BrowserSubprocess
 {
+    using System;
+    using System.ServiceModel;
+    using Internals;
+
     public class CefSubProcess : CefAppWrapper
     {
+        private readonly IEnumerable<string> args;
+        private int? parentBrowserId;
+        protected List<CefBrowserWrapper> browsers = new List<CefBrowserWrapper>();
+
         public int? ParentProcessId { get; private set; }
 
         internal CefSubProcess(IEnumerable<string> args)
         {
+            this.args = args;
             LocateParentProcessId(args);
         }
 
@@ -31,14 +40,169 @@ namespace CefSharp.BrowserSubprocess
             ParentProcessId = int.Parse(parentProcessId);
         }
 
-        public override void OnBrowserCreated(CefBrowserWrapper cefBrowserWrapper)
+        public override void OnBrowserCreated(CefBrowserWrapper browser)
         {
-            
+            browsers.Add(browser);
+
+            if (parentBrowserId == null)
+            {
+                parentBrowserId = browser.BrowserId;
+            }
+
+            if (ParentProcessId == null || parentBrowserId == null)
+            {
+                return;
+            }
+
+            var browserId = browser.IsPopup ? parentBrowserId.Value : browser.BrowserId;
+
+            SetLoggingProcess(browser, browserId);
+            Log(new StartupArgumentsLogMessage(args));
+            Log("OnBrowserCreated browserId = " + browserId);
+            SetBrowserProcess(browser, browserId);
         }
 
-        public override void OnBrowserDestroyed(CefBrowserWrapper cefBrowserWrapper)
+        private void SetBrowserProcess(CefBrowserWrapper browser, int browserId)
         {
-            
+            Log("Setting browser process for browserId=" + browserId);
+            var serviceName = RenderprocessClientFactory.GetServiceName(ParentProcessId.Value, browserId);
+
+            var binding = BrowserProcessServiceHost.CreateBinding();
+
+            var channelFactory = new DuplexChannelFactory<IBrowserProcess>(
+                this,
+                binding,
+                new EndpointAddress(serviceName)
+                );
+
+            channelFactory.Open();
+
+            var browserProcess = channelFactory.CreateChannel();
+            var clientChannel = ((IClientChannel)browserProcess);
+
+
+            try
+            {
+                clientChannel.Open();
+                if (!browser.IsPopup)
+                {
+                    browserProcess.Connect();
+                }
+
+                try
+                {
+                    Log("Getting GetRegisteredJavascriptObjects");
+                    var javascriptObject = browserProcess.GetRegisteredJavascriptObjects();
+                    Log("Got RegisteredJavascriptObjects. MemberObject's count is " + javascriptObject.MemberObjects.Count);
+
+                    if (javascriptObject.MemberObjects.Count > 0)
+                    {
+                        browser.JavascriptRootObject = javascriptObject;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log("Error getting GetRegisteredJavascriptObjects", ex);
+                }
+
+                browser.ChannelFactory = channelFactory;
+                browser.BrowserProcess = browserProcess;
+            }
+            catch (Exception ex)
+            {
+                Log("Error opening client channel", ex);
+            }
+        }
+
+        private void SetLoggingProcess(CefBrowserWrapper browser, int browserId)
+        {
+            var serviceName = RenderprocessClientFactory.GetLogServiceName(ParentProcessId.Value, browserId);
+
+            var binding = BrowserProcessServiceHost.CreateBinding();
+
+            var channelFactory = new ChannelFactory<ILogService>(                
+                binding,
+                new EndpointAddress(serviceName));
+
+            channelFactory.Open();
+
+            var logProcess = channelFactory.CreateChannel();
+            var clientChannel = ((IClientChannel)logProcess);
+
+            try
+            {
+                clientChannel.Open();
+
+                browser.LogProcess = logProcess;
+            }
+            catch
+            {
+            }
+        }
+
+        protected override void DoDispose(bool isDisposing)
+        {
+            foreach (var browser in browsers)
+            {
+                browser.Dispose();
+            }
+
+            browsers = null;
+
+            base.DoDispose(isDisposing);
+        }
+
+        public override void OnBrowserDestroyed(CefBrowserWrapper browser)
+        {
+            browsers.Remove(browser);
+
+            var channelFactory = browser.ChannelFactory;
+
+            if (channelFactory.State == CommunicationState.Opened)
+            {
+                channelFactory.Close();
+            }
+
+            var clientChannel = ((IClientChannel)browser.BrowserProcess);
+
+            if (clientChannel.State == CommunicationState.Opened)
+            {
+                clientChannel.Close();
+            }
+
+            browser.ChannelFactory = null;
+            browser.BrowserProcess = null;
+            browser.JavascriptRootObject = null;
+        }
+
+        public void Log(string message)
+        {
+            Log(new LogMessage(message));
+        }
+
+        public void Log(Exception exception)
+        {
+            Log(new LogMessage(exception));
+        }
+
+        public void Log(string message, Exception exception)
+        {
+            Log(new LogMessage(message, exception));
+        }
+
+        public void Log(LogMessage message)
+        {
+            foreach (var browser in browsers)
+            {
+                if (browser.LogProcess != null)
+                {
+                    try
+                    {
+                        browser.LogProcess.Log(message);
+                    }
+                    catch { }
+                }
+            }
         }
     }
 }

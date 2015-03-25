@@ -49,6 +49,7 @@ namespace CefSharp.Wpf
         public IDragHandler DragHandler { get; set; }
         public IResourceHandlerFactory ResourceHandlerFactory { get; set; }
         public IGeolocationHandler GeolocationHandler { get; set; }
+        public ILogHandler LogHandler { get; set; }
         public IBitmapFactory BitmapFactory { get; set; }
 
         public event EventHandler<ConsoleMessageEventArgs> ConsoleMessage;

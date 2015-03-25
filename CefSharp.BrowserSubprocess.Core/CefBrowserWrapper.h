@@ -43,6 +43,7 @@ namespace CefSharp
             void set(CefSharp::JavascriptRootObjectWrapper^ value);
         };
         property IBrowserProcess^ BrowserProcess;
+        property ILogService^ LogProcess;
 
         JavascriptResponse^ EvaluateScriptInContext(CefRefPtr<CefV8Context> context, CefString script);
 

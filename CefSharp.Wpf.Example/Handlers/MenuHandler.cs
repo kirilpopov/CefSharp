@@ -6,6 +6,8 @@ using System;
 
 namespace CefSharp.Wpf.Example.Handlers
 {
+    using Internals;
+
     public class MenuHandler : IMenuHandler
     {
         public bool OnBeforeContextMenu(IWebBrowser browser, IContextMenuParams parameters)
@@ -14,6 +16,14 @@ namespace CefSharp.Wpf.Example.Handlers
             Console.WriteLine(parameters.MisspelledWord);
 
             return true;
+        }
+    }
+
+    public class WpfLogHandler : ILogHandler
+    {
+        public void Log(LogMessage message)
+        {
+            
         }
     }
 }

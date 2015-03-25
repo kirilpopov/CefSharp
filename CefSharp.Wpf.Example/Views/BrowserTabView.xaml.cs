@@ -8,6 +8,8 @@ using CefSharp.Example;
 
 namespace CefSharp.Wpf.Example.Views
 {
+    using Handlers;
+
     public partial class BrowserTabView : UserControl
     {
         public BrowserTabView()
@@ -20,7 +22,7 @@ namespace CefSharp.Wpf.Example.Views
             browser.MenuHandler = new Handlers.MenuHandler();
             browser.GeolocationHandler = new Handlers.GeolocationHandler();
             browser.DownloadHandler = new DownloadHandler();
-
+            browser.LogHandler = new WpfLogHandler();
             CefExample.RegisterTestResources(browser);
         }
 

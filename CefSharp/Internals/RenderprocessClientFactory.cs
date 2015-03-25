@@ -13,5 +13,11 @@ namespace CefSharp.Internals
         {
             return string.Join("/", BaseAddress, ServiceName, parentProcessId, browserId);
         }
+
+        private const string LogServiceName = "CefSharpSubProcessLogProxy";
+        public static string GetLogServiceName(int parentProcessId, int browserId)
+        {
+            return string.Join("/", BaseAddress, LogServiceName, parentProcessId, browserId);
+        }
     }
 }
