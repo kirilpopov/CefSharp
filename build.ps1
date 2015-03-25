@@ -3,9 +3,9 @@ param(
     [Parameter(Position = 0)] 
     [string] $Target = "nupkg",
     [Parameter(Position = 1)]
-    [string] $Version = "39.0.2",
+    [string] $Version = "39.0.3",
     [Parameter(Position = 2)]
-    [string] $AssemblyVersion = "39.0.2",
+    [string] $AssemblyVersion = "39.0.3",
     [Parameter(Position = 3)]
     [string] $RedistVersion = "3.2171.1979"
 )
@@ -14,8 +14,9 @@ $WorkingDir = split-path -parent $MyInvocation.MyCommand.Definition
 
 $CefSln = Join-Path $WorkingDir 'CefSharp3.sln'
 
-$MSBuildExe = join-path -path (Get-ItemProperty "HKLM:\software\Microsoft\MSBuild\ToolsVersions\4.0").MSBuildToolsPath -childpath "msbuild.exe"
-$MSBuildExe = $MSBuildExe -replace "Framework64", "Framework"
+
+$MSBuildExe = join-path -path (Get-ItemProperty "HKLM:\software\Microsoft\MSBuild\ToolsVersions\12.0").MSBuildToolsPath -childpath "msbuild.exe"
+$MSBuildExe = $MSBuildExe -replace "amd64", ""
 
 function Write-Diagnostic 
 {
@@ -29,6 +30,7 @@ function Write-Diagnostic
     Write-Host
 }
 
+Write-Diagnostic "MSBuildExe $MSBuildExe" 
 if (Test-Path Env:\APPVEYOR_BUILD_VERSION)
 {
     $Version = $env:APPVEYOR_BUILD_VERSION
@@ -131,18 +133,21 @@ function Msvs
         'v110' {
             $VisualStudioVersion = '11.0'
             $VXXCommonTools = Join-Path $env:VS110COMNTOOLS '..\..\vc'
+			
         }
         'v120' {
             $VisualStudioVersion = '12.0'
-            $VXXCommonTools = Join-Path $env:VS120COMNTOOLS '..\..\vc'
+            $VXXCommonTools = Join-Path $env:VS120COMNTOOLS '..\..\vc'			
         }
     }
 
+	
     if ($VXXCommonTools -eq $null -or (-not (Test-Path($VXXCommonTools)))) {
         Die 'Error unable to find any visual studio environment'
     }
 
     $VCVarsAll = Join-Path $VXXCommonTools vcvarsall.bat
+	
     if (-not (Test-Path $VCVarsAll)) {
         Die "Unable to find $VCVarsAll"
     }
@@ -217,7 +222,7 @@ function VSX
     Write-Diagnostic "Starting to build targeting toolchain $Toolchain"
 
     Msvs "$Toolchain" 'Release' 'x86'
-    Msvs "$Toolchain" 'Release' 'x64'
+    #Msvs "$Toolchain" 'Release' 'x64'
 
     Write-Diagnostic "Finished build targeting toolchain $Toolchain"
 }
@@ -254,9 +259,7 @@ function Nupkg
     # Build packages
     . $nuget pack nuget\CefSharp.Common.nuspec -NoPackageAnalysis -Version $Version -OutputDirectory nuget -Properties "RedistVersion=$RedistVersion"
     . $nuget pack nuget\CefSharp.Wpf.nuspec -NoPackageAnalysis -Version $Version -OutputDirectory nuget
-    . $nuget pack nuget\CefSharp.OffScreen.nuspec -NoPackageAnalysis -Version $Version -OutputDirectory nuget
-    . $nuget pack nuget\CefSharp.WinForms.nuspec -NoPackageAnalysis -Version $Version -OutputDirectory nuget
-
+    
     # Invoke `AfterBuild` script if available (ie. upload packages to myget)
     if(-not (Test-Path $WorkingDir\AfterBuild.ps1)) {
         return
@@ -297,8 +300,8 @@ WriteAssemblyVersion
 switch -Exact ($Target) {
     "nupkg"
     {
-        #VSX v120
-        VSX v110
+        VSX v120
+        #VSX v110
         Nupkg
     }
     "nupkg-only"
