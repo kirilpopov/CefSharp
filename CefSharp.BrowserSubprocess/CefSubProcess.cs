@@ -196,7 +196,11 @@ namespace CefSharp.BrowserSubprocess
             {
                 if (browser.LogProcess != null)
                 {
-                    browser.LogProcess.Log(message);
+                    try
+                    {
+                        browser.LogProcess.Log(message);
+                    }
+                    catch { }
                 }
             }
         }

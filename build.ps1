@@ -3,9 +3,9 @@ param(
     [Parameter(Position = 0)] 
     [string] $Target = "nupkg",
     [Parameter(Position = 1)]
-    [string] $Version = "39.0.1",
+    [string] $Version = "39.0.2",
     [Parameter(Position = 2)]
-    [string] $AssemblyVersion = "39.0.1",
+    [string] $AssemblyVersion = "39.0.2",
     [Parameter(Position = 3)]
     [string] $RedistVersion = "3.2171.1979"
 )
