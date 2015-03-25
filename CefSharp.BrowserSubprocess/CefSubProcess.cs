@@ -56,14 +56,15 @@ namespace CefSharp.BrowserSubprocess
 
             var browserId = browser.IsPopup ? parentBrowserId.Value : browser.BrowserId;
 
-            SetBrowserProcess(browser, browserId);
             SetLoggingProcess(browser, browserId);
-            
-            browser.LogProcess.Log(new StartupArgumentsLogMessage(args));
+            Log(new StartupArgumentsLogMessage(args));
+            Log("OnBrowserCreated browserId = " + browserId);
+            SetBrowserProcess(browser, browserId);
         }
 
         private void SetBrowserProcess(CefBrowserWrapper browser, int browserId)
         {
+            Log("Setting browser process for browserId=" + browserId);
             var serviceName = RenderprocessClientFactory.GetServiceName(ParentProcessId.Value, browserId);
 
             var binding = BrowserProcessServiceHost.CreateBinding();
@@ -79,6 +80,7 @@ namespace CefSharp.BrowserSubprocess
             var browserProcess = channelFactory.CreateChannel();
             var clientChannel = ((IClientChannel)browserProcess);
 
+
             try
             {
                 clientChannel.Open();
@@ -87,18 +89,28 @@ namespace CefSharp.BrowserSubprocess
                     browserProcess.Connect();
                 }
 
-                var javascriptObject = browserProcess.GetRegisteredJavascriptObjects();
-
-                if (javascriptObject.MemberObjects.Count > 0)
+                try
                 {
-                    browser.JavascriptRootObject = javascriptObject;
+                    Log("Getting GetRegisteredJavascriptObjects");
+                    var javascriptObject = browserProcess.GetRegisteredJavascriptObjects();
+                    Log("Got RegisteredJavascriptObjects. MemberObject's count is " + javascriptObject.MemberObjects.Count);
+
+                    if (javascriptObject.MemberObjects.Count > 0)
+                    {
+                        browser.JavascriptRootObject = javascriptObject;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log("Error getting GetRegisteredJavascriptObjects", ex);
                 }
 
                 browser.ChannelFactory = channelFactory;
                 browser.BrowserProcess = browserProcess;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log("Error opening client channel", ex);
             }
         }
 
@@ -123,7 +135,7 @@ namespace CefSharp.BrowserSubprocess
 
                 browser.LogProcess = logProcess;
             }
-            catch (Exception)
+            catch
             {
             }
         }
@@ -164,26 +176,28 @@ namespace CefSharp.BrowserSubprocess
         }
 
         public void Log(string message)
-        { 
-            foreach(var browser in browsers)
-            {
-                browser.LogProcess.Log(new LogMessage(message));
-            }
+        {
+            Log(new LogMessage(message));
         }
 
         public void Log(Exception exception)
         {
-            foreach (var browser in browsers)
-            {
-                browser.LogProcess.Log(new LogMessage(exception));
-            }
+            Log(new LogMessage(exception));
         }
 
         public void Log(string message, Exception exception)
         {
+            Log(new LogMessage(message, exception));
+        }
+
+        public void Log(LogMessage message)
+        {
             foreach (var browser in browsers)
             {
-                browser.LogProcess.Log(new LogMessage(message, exception));
+                if (browser.LogProcess != null)
+                {
+                    browser.LogProcess.Log(message);
+                }
             }
         }
     }

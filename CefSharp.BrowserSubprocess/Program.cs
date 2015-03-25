@@ -41,7 +41,7 @@ namespace CefSharp.BrowserSubprocess
             {
                 if (subProcess != null)
                 {
-                    subProcess.Log("Unhandled exception in " + subProcess.GetType() + exception.ToString());
+                    subProcess.Log("Unhandled exception in " + subProcess.GetType(), exception);
                 }
             }
             catch (Exception ex)

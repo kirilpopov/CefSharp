@@ -98,6 +98,7 @@
     <Compile Include="Internals\JavascriptCallback.cs" />
     <Compile Include="Internals\JavascriptCallbackEndpointBehavior.cs" />
     <Compile Include="Internals\JavascriptCallbackSurrogate.cs" />
+    <Compile Include="Internals\LogMessages.cs" />
     <Compile Include="Internals\LogService.cs" />
     <Compile Include="Internals\LogServiceHost.cs" />
     <Compile Include="Internals\ReflectionUtils.cs" />
