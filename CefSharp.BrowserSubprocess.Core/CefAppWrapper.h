@@ -11,6 +11,7 @@
 #include "CefBrowserWrapper.h"
 #include "CefAppUnmanagedWrapper.h"
 
+using namespace System;
 using namespace System::Collections::Generic;
 
 namespace CefSharp
@@ -30,5 +31,6 @@ namespace CefSharp
 
 		virtual void OnBrowserCreated(CefBrowserWrapper^ cefBrowserWrapper) abstract;
 		virtual void OnBrowserDestroyed(CefBrowserWrapper^ cefBrowserWrapper) abstract;		
+    virtual void OnUncaughtException(CefBrowserWrapper^ cefBrowserWrapper, String^ text, String^ stack) abstract;
 	};
 }

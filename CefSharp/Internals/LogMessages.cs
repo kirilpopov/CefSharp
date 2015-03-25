@@ -69,4 +69,17 @@
             return base.ToString() + " args:" + args;
         }
     }
+
+    [DataContract]
+    public class JsExceptionLogMessage : LogMessage
+    {
+        [DataMember]
+        public string Stack { get; set; }
+
+        public JsExceptionLogMessage(string message, string stack)
+            : base(message)
+        {
+            Stack = stack;
+        }
+    }
 }

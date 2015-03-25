@@ -155,6 +155,6 @@ namespace CefSharp.BrowserSubprocess
             }, TaskCreationOptions.AttachedToParent);
 
             return timeout.HasValue ? task.WithTimeout(timeout.Value) : task;
-        }
+        }      
     }
 }

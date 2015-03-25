@@ -175,6 +175,11 @@ namespace CefSharp.BrowserSubprocess
             browser.JavascriptRootObject = null;
         }
 
+        public override void OnUncaughtException(CefBrowserWrapper cefBrowserWrapper, string text, string stack)
+        {
+            Log(new JsExceptionLogMessage());
+        }
+
         public void Log(string message)
         {
             Log(new LogMessage(message));

@@ -19,7 +19,8 @@ namespace CefSharp
     {
         auto onBrowserCreated = gcnew Action<CefBrowserWrapper^>(this, &CefAppWrapper::OnBrowserCreated);
         auto onBrowserDestroyed = gcnew Action<CefBrowserWrapper^>(this, &CefAppWrapper::OnBrowserDestroyed);
-        _cefApp = new CefAppUnmanagedWrapper(onBrowserCreated, onBrowserDestroyed);
+        auto onUncaughtException = gcnew Action<CefBrowserWrapper^, String^, String^>(this, &CefAppWrapper::OnUncaughtException);
+        _cefApp = new CefAppUnmanagedWrapper(onBrowserCreated, onBrowserDestroyed, onUncaughtException);
 
         RenderThreadTaskFactory = gcnew TaskFactory(gcnew CefTaskScheduler(TID_RENDERER));
     };

@@ -82,4 +82,33 @@ namespace CefSharp
 
         return wrapper;
     };
+
+    void CefAppUnmanagedWrapper::OnUncaughtException(
+      CefRefPtr<CefBrowser> browser,
+      CefRefPtr<CefFrame> frame,
+      CefRefPtr<CefV8Context> context,
+      CefRefPtr<CefV8Exception> exception,
+      CefRefPtr<CefV8StackTrace> stackTrace)
+    {
+
+      auto wrapper = FindBrowserWrapper(browser, true);
+
+      System::String^ line;
+      for (int i = 0; i < stackTrace->GetFrameCount(); ++i)
+      {
+        auto frame = stackTrace->GetFrame(i);
+        if (!frame->IsValid())
+        {
+          continue;
+        }
+
+        line +=
+          StringUtils::ToClr(frame->GetScriptNameOrSourceURL()) + ":" + StringUtils::ToClr(frame->GetFunctionName()) + ":" + frame->GetLineNumber() + ":" + frame->GetColumn() + "\n";
+      }
+      
+      _onUncaughtException->Invoke(
+        wrapper,
+        StringUtils::ToClr(exception->GetMessage()),
+        line);
+    }
 }
