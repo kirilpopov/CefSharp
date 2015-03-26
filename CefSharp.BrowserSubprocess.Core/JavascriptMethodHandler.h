@@ -16,9 +16,10 @@ namespace CefSharp
     private:
         gcroot<Func<array<Object^>^, BrowserProcessResponse^>^> _method;
         gcroot<JavascriptCallbackRegistry^> _callbackRegistry;
+        gcroot<IBrowserProcess^> _browserProcess;
 
     public:
-        JavascriptMethodHandler(Func<array<Object^>^, BrowserProcessResponse^>^ method, JavascriptCallbackRegistry^ callbackRegistry);
+        JavascriptMethodHandler(Func<array<Object^>^, BrowserProcessResponse^>^ method, JavascriptCallbackRegistry^ callbackRegistry, IBrowserProcess^ _browserProcess);
 
         ~JavascriptMethodHandler();
 

@@ -59,7 +59,7 @@ namespace CefSharp
             }
         }
 
-        void Bind();
+        CefRefPtr<CefV8Value> Bind();
         BrowserProcessResponse^ GetProperty(String^ memberName);
         BrowserProcessResponse^ SetProperty(String^ memberName, Object^ value);
     };

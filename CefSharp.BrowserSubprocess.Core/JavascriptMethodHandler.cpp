@@ -5,15 +5,17 @@
 #include "Stdafx.h"
 #include "TypeUtils.h"
 #include "JavascriptMethodHandler.h"
+#include "JavascriptObjectWrapper.h"
 
 using namespace CefSharp::Internals;
 
 namespace CefSharp
 {
-    JavascriptMethodHandler::JavascriptMethodHandler(Func<array<Object^>^, BrowserProcessResponse^>^ method, JavascriptCallbackRegistry^ callbackRegistry)
+    JavascriptMethodHandler::JavascriptMethodHandler(Func<array<Object^>^, BrowserProcessResponse^>^ method, JavascriptCallbackRegistry^ callbackRegistry, IBrowserProcess^ browserProcess)
     {
         _method = method;
         _callbackRegistry = callbackRegistry;
+        _browserProcess = browserProcess;
     }
 
     JavascriptMethodHandler::~JavascriptMethodHandler()
@@ -65,31 +67,36 @@ namespace CefSharp
         }
 
         auto type = obj->GetType();
-
+        
         if (type == JavascriptObject::typeid)
         {
             JavascriptObject^ javascriptObject = (JavascriptObject^)obj;
-            CefRefPtr<CefV8Value> cefObject = CefV8Value::CreateObject(NULL);
+            javascriptObject->JavascriptName = "kiro";
+            auto objectWrapper = gcnew JavascriptObjectWrapper(javascriptObject, _browserProcess);
+            objectWrapper->CallbackRegistry = _callbackRegistry;            
+            objectWrapper->V8Value = CefV8Value::CreateObject(NULL);
+            auto jsObject = objectWrapper->Bind();
+            
 
-            for (int i = 0; i < javascriptObject->Properties->Count; i++)
-            {
-                auto prop = javascriptObject->Properties[i];
+            //CefRefPtr<CefV8Value> cefObject = CefV8Value::CreateObject(NULL);
+            //for (int i = 0; i < javascriptObject->Properties->Count; i++)
+            //{
+            //    auto prop = javascriptObject->Properties[i];
 
-                if (prop->IsComplexType)
-                {
-                    auto v8Value = ConvertToCefObject(prop->JsObject);
+            //    if (prop->IsComplexType)
+            //    {
+            //        auto v8Value = ConvertToCefObject(prop->JsObject);
 
-                    cefObject->SetValue(StringUtils::ToNative(prop->JavascriptName), v8Value, CefV8Value::PropertyAttribute::V8_PROPERTY_ATTRIBUTE_NONE);
-                }
-                else
-                {
-                    auto v8Value = TypeUtils::ConvertToCef(prop->PropertyValue, nullptr);
+            //        cefObject->SetValue(StringUtils::ToNative(prop->JavascriptName), v8Value, CefV8Value::PropertyAttribute::V8_PROPERTY_ATTRIBUTE_NONE);
+            //    }
+            //    else
+            //    {
+            //        auto v8Value = TypeUtils::ConvertToCef(prop->PropertyValue, nullptr);
 
-                    cefObject->SetValue(StringUtils::ToNative(prop->JavascriptName), v8Value, CefV8Value::PropertyAttribute::V8_PROPERTY_ATTRIBUTE_NONE);
-                }
-            }
-
-            return cefObject;
+            //        cefObject->SetValue(StringUtils::ToNative(prop->JavascriptName), v8Value, CefV8Value::PropertyAttribute::V8_PROPERTY_ATTRIBUTE_NONE);
+            //    }
+            //}
+            return jsObject.get();
         }
 
         return TypeUtils::ConvertToCef(obj, nullptr);

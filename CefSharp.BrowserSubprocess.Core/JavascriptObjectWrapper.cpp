@@ -12,7 +12,7 @@ using namespace CefSharp::Internals;
 
 namespace CefSharp
 {
-	void JavascriptObjectWrapper::Bind()
+	CefRefPtr<CefV8Value> JavascriptObjectWrapper::Bind()
 	{
 		//Create property handler for get and set of Properties of this object
 		_jsPropertyHandler = new JavascriptPropertyHandler(
@@ -42,6 +42,8 @@ namespace CefSharp
 
 			_wrappedProperties->Add(wrappedproperty);
 		}
+
+    return javascriptObject;
 	}
 
 	BrowserProcessResponse^ JavascriptObjectWrapper::GetProperty(String^ memberName)

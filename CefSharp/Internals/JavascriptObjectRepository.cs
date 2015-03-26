@@ -89,7 +89,7 @@ namespace CefSharp.Internals
                     jsObject.Name = "FunctionResult(" + name + ")";
                     jsObject.JavascriptName = jsObject.Name;
 
-                    AnalyseObjectForBinding(jsObject, analyseMethods: false, readPropertyValue: true);
+                    AnalyseObjectForBinding(jsObject, analyseMethods: true, readPropertyValue: true);
 
                     result = jsObject;
                 }
@@ -270,7 +270,7 @@ namespace CefSharp.Internals
             jsMethod.ManagedName = methodInfo.Name;
             jsMethod.JavascriptName = LowercaseFirst(methodInfo.Name);
             jsMethod.Function = methodInfo.Invoke;
-            jsMethod.ParameterCount = methodInfo.GetParameters().Length;
+            jsMethod.ParameterCount = methodInfo.GetParameters().Length;            
 
             return jsMethod;
         }
