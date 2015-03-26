@@ -6,6 +6,7 @@
 
 #include "Stdafx.h"
 #include "include/cef_v8.h"
+#include "JavascriptCallbackRegistry.h"
 
 using namespace CefSharp::Internals;
 
@@ -19,15 +20,18 @@ namespace CefSharp
         IBrowserProcess^ _browserProcess;
         //TODO: Strongly type this variable - currently trying to include JavascriptObjectWrapper.h creates a circular reference, so won't compile
         Object^ _javascriptObjectWrapper;
+        JavascriptCallbackRegistry^ _callbackRegistry;
+
     internal:
         MCefRefPtr<CefV8Value> V8Value;
 
     public:
-        JavascriptPropertyWrapper(JavascriptProperty^ javascriptProperty, int64 ownerId, IBrowserProcess^ browserProcess)
+        JavascriptPropertyWrapper(JavascriptProperty^ javascriptProperty, int64 ownerId, IBrowserProcess^ browserProcess, JavascriptCallbackRegistry^ callbackRegistry)
         {
             _javascriptProperty = javascriptProperty;
             _ownerId = ownerId;
             _browserProcess = browserProcess;
+            _callbackRegistry = callbackRegistry;
         }
 
         ~JavascriptPropertyWrapper()

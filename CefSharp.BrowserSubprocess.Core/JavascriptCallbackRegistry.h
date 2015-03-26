@@ -12,7 +12,7 @@ namespace CefSharp
 {
     namespace Internals
     {
-        private ref class JavascriptCallbackRegistry
+        public ref class JavascriptCallbackRegistry
         {
         private:
             int _browserId;

@@ -20,6 +20,7 @@ namespace CefSharp
         if (_javascriptProperty->IsComplexType)
         {
             auto javascriptObjectWrapper = gcnew JavascriptObjectWrapper(_javascriptProperty->JsObject, _browserProcess);
+            javascriptObjectWrapper->CallbackRegistry = _callbackRegistry;
             javascriptObjectWrapper->V8Value = V8Value.get();
             javascriptObjectWrapper->Bind();
 
